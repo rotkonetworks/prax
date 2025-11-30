@@ -8,6 +8,7 @@ import { SettingsRPC } from './settings-rpc';
 import { SettingsDefaultFrontend } from './settings-default-frontend';
 import { SettingsNumeraires } from './settings-numeraires';
 import { SettingsAirgapSigner } from './settings-airgap-signer';
+import { SettingsTradingMode } from './settings-trading-mode';
 
 export const settingsRoutes = [
   {
@@ -45,5 +46,9 @@ export const settingsRoutes = [
   {
     path: PopupPath.SETTINGS_AIRGAP_SIGNER,
     element: <SettingsAirgapSigner />,
+  },
+  {
+    path: PopupPath.SETTINGS_TRADING_MODE,
+    element: <SettingsTradingMode />,
   },
 ];

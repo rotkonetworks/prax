@@ -25,6 +25,7 @@ export const customPersistImpl: Persist = f => (set, get, store) => {
     const frontendUrl = await localExtStorage.get('frontendUrl');
     const numeraires = await localExtStorage.get('numeraires');
     const airgapSignerCameraEnabled = await localExtStorage.get('airgapSignerCameraEnabled');
+    const tradingMode = await localExtStorage.get('tradingMode');
 
     set(
       produce((state: AllSlices) => {
@@ -34,6 +35,9 @@ export const customPersistImpl: Persist = f => (set, get, store) => {
         state.defaultFrontend.url = frontendUrl;
         state.numeraires.selectedNumeraires = numeraires;
         state.airgapSigner.cameraEnabled = airgapSignerCameraEnabled ?? false;
+        if (tradingMode) {
+          state.tradingMode.settings = tradingMode;
+        }
       }),
     );
 
@@ -109,6 +113,17 @@ export const customPersistImpl: Persist = f => (set, get, store) => {
         set(
           produce((state: AllSlices) => {
             state.airgapSigner.cameraEnabled = stored ?? false;
+          }),
+        );
+      }
+
+      if (changes.tradingMode) {
+        const stored = changes.tradingMode.newValue;
+        set(
+          produce((state: AllSlices) => {
+            if (stored) {
+              state.tradingMode.settings = stored;
+            }
           }),
         );
       }
