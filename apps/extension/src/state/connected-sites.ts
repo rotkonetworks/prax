@@ -40,3 +40,5 @@ export const allSitesFilteredOutSelector = (state: AllSlices) => {
 
   return !state.connectedSites.knownSites.some(site => site.origin.includes(filter));
 };
+
+export const connectedSitesSelector = (state: AllSlices) => state.connectedSites;

@@ -13,5 +13,6 @@ export enum PopupPath {
   SETTINGS_RECOVERY_PASSPHRASE = '/settings/recovery-passphrase',
   SETTINGS_NUMERAIRES = '/settings/numeraires',
   SETTINGS_AIRGAP_SIGNER = '/settings/airgap-signer',
+  SETTINGS_TRADING_MODE = '/settings/trading-mode',
   // RESET_PASSWORD = '/settings/reset-password',
 }
