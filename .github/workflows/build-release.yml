@@ -18,7 +18,7 @@ on:
       penumbra_web_repo:
         description: 'penumbra-web repository (org/repo)'
         required: false
-        default: 'rotkonetworks/web'
+        default: 'rotkonetworks/penumbra-web'
       penumbra_web_ref:
         description: 'penumbra-web branch/tag/commit'
         required: false
@@ -46,7 +46,7 @@ jobs:
       - name: Checkout penumbra-web
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.inputs.penumbra_web_repo || 'rotkonetworks/web' }}
+          repository: ${{ github.event.inputs.penumbra_web_repo || 'rotkonetworks/penumbra-web' }}
           ref: ${{ github.event.inputs.penumbra_web_ref || 'feat/rayon-parallel-wasm' }}
           path: penumbra-web
 
@@ -177,7 +177,7 @@ jobs:
       - name: Generate build manifest
         working-directory: prax/apps/extension
         env:
-          PENUMBRA_WEB_REPO: ${{ github.event.inputs.penumbra_web_repo || 'rotkonetworks/web' }}
+          PENUMBRA_WEB_REPO: ${{ github.event.inputs.penumbra_web_repo || 'rotkonetworks/penumbra-web' }}
           PENUMBRA_WEB_REF: ${{ github.event.inputs.penumbra_web_ref || 'feat/rayon-parallel-wasm' }}
         run: |
           cat > build-manifest.json << EOF
@@ -250,7 +250,7 @@ jobs:
         if: ${{ github.event.inputs.create_release == 'true' || github.event_name == 'push' }}
         uses: softprops/action-gh-release@v2
         env:
-          PENUMBRA_WEB_REPO: ${{ github.event.inputs.penumbra_web_repo || 'rotkonetworks/web' }}
+          PENUMBRA_WEB_REPO: ${{ github.event.inputs.penumbra_web_repo || 'rotkonetworks/penumbra-web' }}
           PENUMBRA_WEB_REF: ${{ github.event.inputs.penumbra_web_ref || 'feat/rayon-parallel-wasm' }}
         with:
           name: Prax v${{ steps.version.outputs.version }}
