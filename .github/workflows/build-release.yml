@@ -15,6 +15,16 @@ on:
           - beta
           - prod
           - all
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - none
       penumbra_web_repo:
         description: 'penumbra-web repository (org/repo)'
         required: false
@@ -23,11 +33,6 @@ on:
         description: 'penumbra-web branch/tag/commit'
         required: false
         default: 'feat/rayon-parallel-wasm'
-      create_release:
-        description: 'Create GitHub release'
-        required: false
-        default: false
-        type: boolean
 
 env:
   CARGO_TERM_COLOR: always
@@ -137,22 +142,69 @@ jobs:
         working-directory: prax/apps/extension
         run: pnpm bundle:prod
 
-      - name: Get version info
+      - name: Bump version
         id: version
         run: |
-          VERSION=$(node -p "require('./prax/apps/extension/package.json').version")
+          cd prax/apps/extension
+
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          BUMP_TYPE="${{ github.event.inputs.version_bump || 'patch' }}"
+          BUILD_TARGET="${{ github.event.inputs.build_target || 'beta' }}"
+
+          # Parse current version
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${CURRENT_VERSION%-*}"
+
+          # Bump version based on type
+          if [ "$BUMP_TYPE" != "none" ]; then
+            case "$BUMP_TYPE" in
+              major)
+                MAJOR=$((MAJOR + 1))
+                MINOR=0
+                PATCH=0
+                ;;
+              minor)
+                MINOR=$((MINOR + 1))
+                PATCH=0
+                ;;
+              patch)
+                PATCH=$((PATCH + 1))
+                ;;
+            esac
+          fi
+
+          # Create version string
+          if [ "$BUILD_TARGET" = "beta" ]; then
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-beta"
+          else
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+
+          # Update package.json if version changed
+          if [ "$BUMP_TYPE" != "none" ]; then
+            node -e "
+              const fs = require('fs');
+              const pkg = JSON.parse(fs.readFileSync('./package.json'));
+              pkg.version = '${NEW_VERSION}';
+              fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+            "
+            echo "Bumped version: $CURRENT_VERSION -> $NEW_VERSION"
+          fi
+
+          cd ../../..
+
           PRAX_COMMIT=$(cd prax && git rev-parse HEAD)
           PRAX_SHORT=$(cd prax && git rev-parse --short HEAD)
           PENUMBRA_COMMIT=$(cd penumbra-web && git rev-parse HEAD)
           PENUMBRA_SHORT=$(cd penumbra-web && git rev-parse --short HEAD)
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "prax_commit=$PRAX_COMMIT" >> $GITHUB_OUTPUT
           echo "prax_short=$PRAX_SHORT" >> $GITHUB_OUTPUT
           echo "penumbra_commit=$PENUMBRA_COMMIT" >> $GITHUB_OUTPUT
           echo "penumbra_short=$PENUMBRA_SHORT" >> $GITHUB_OUTPUT
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "tag=v${NEW_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Create build artifacts
         working-directory: prax/apps/extension
@@ -247,16 +299,15 @@ jobs:
             prax/apps/extension/checksums.sha256
 
       - name: Create GitHub Release
-        if: ${{ github.event.inputs.create_release == 'true' || github.event_name == 'push' }}
         uses: softprops/action-gh-release@v2
         env:
           PENUMBRA_WEB_REPO: ${{ github.event.inputs.penumbra_web_repo || 'rotkonetworks/penumbra-web' }}
           PENUMBRA_WEB_REF: ${{ github.event.inputs.penumbra_web_ref || 'feat/rayon-parallel-wasm' }}
         with:
-          name: Prax v${{ steps.version.outputs.version }}
-          tag_name: ${{ github.ref_name || format('v{0}-{1}', steps.version.outputs.version, steps.version.outputs.timestamp) }}
-          draft: ${{ github.event_name == 'workflow_dispatch' }}
-          prerelease: ${{ contains(github.ref, 'beta') || github.event.inputs.build_target == 'beta' }}
+          name: Prax ${{ steps.version.outputs.tag }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, 'beta') }}
           body: |
             ## Prax Wallet v${{ steps.version.outputs.version }}
 
