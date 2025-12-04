@@ -6,12 +6,28 @@ import rootPackageJson from '../../package.json' with { type: 'json' };
 
 import CopyPlugin from 'copy-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import { spawn } from 'node:child_process';
+import { spawn, execSync } from 'node:child_process';
 import path from 'node:path';
 import url from 'node:url';
 import { type WebExtRunner, cmd as WebExtCmd } from 'web-ext';
 import webpack from 'webpack';
 import WatchExternalFilesPlugin from 'webpack-watch-external-files-plugin';
+
+// Get git commit info for build verification
+const getGitInfo = (cwd: string) => {
+  try {
+    const commit = execSync('git rev-parse HEAD', { cwd, encoding: 'utf-8' }).trim();
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd, encoding: 'utf-8' }).trim();
+    const dirty = execSync('git diff --quiet && echo clean || echo dirty', {
+      cwd,
+      encoding: 'utf-8',
+      shell: '/bin/bash',
+    }).trim();
+    return { commit, branch, dirty };
+  } catch {
+    return { commit: 'unknown', branch: 'unknown', dirty: 'unknown' };
+  }
+};
 
 export default ({
   WEBPACK_WATCH = false,
@@ -49,6 +65,17 @@ export default ({
 
   const CHROMIUM_PROFILE = process.env['CHROMIUM_PROFILE'];
 
+  // Get git commit info for build verification
+  const praxGit = getGitInfo(__dirname);
+  const penumbraWebDir = path.resolve(__dirname, '../../../penumbra-web');
+  const penumbraWebGit = getGitInfo(penumbraWebDir);
+
+  const BUILD_INFO = {
+    prax: praxGit,
+    penumbraWeb: penumbraWebGit,
+    buildTime: new Date().toISOString(),
+  };
+
   /*
    * The DefinePlugin replaces specified tokens with specified values.
    * - These should be declared in `prax.d.ts` for TypeScript awareness.
@@ -58,6 +85,7 @@ export default ({
   const DefinePlugin = new webpack.DefinePlugin({
     PRAX: JSON.stringify(PRAX_ID),
     PRAX_ORIGIN: JSON.stringify(`chrome-extension://${PRAX_ID}`),
+    BUILD_INFO: JSON.stringify(BUILD_INFO),
     'globalThis.__DEV__': JSON.stringify(process.env['NODE_ENV'] !== 'production'),
     'globalThis.__ASSERT_ROOT__': JSON.stringify(false),
   });
