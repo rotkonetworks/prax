@@ -30,8 +30,8 @@ export const createWalletsSlice =
         );
 
         const seedPhraseStr = seedPhrase.join(' ');
-        const spendKey = generateSpendKey(seedPhraseStr);
-        const fullViewingKey = getFullViewingKey(spendKey);
+        const spendKey = await generateSpendKey(seedPhraseStr);
+        const fullViewingKey = await getFullViewingKey(spendKey);
 
         const passwordKey = await session.get('passwordKey');
         if (passwordKey === undefined) {
@@ -39,7 +39,7 @@ export const createWalletsSlice =
         }
 
         const key = await Key.fromJson(passwordKey);
-        const newWallet = new Wallet(label, getWalletId(fullViewingKey), fullViewingKey, {
+        const newWallet = new Wallet(label, await getWalletId(fullViewingKey), fullViewingKey, {
           encryptedSeedPhrase: await key.seal(seedPhraseStr),
         });
 
