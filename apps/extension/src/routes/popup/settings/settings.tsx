@@ -1,4 +1,10 @@
-import { DashboardIcon, ExitIcon, FileTextIcon, Link1Icon } from '@radix-ui/react-icons';
+import {
+  DashboardIcon,
+  ExitIcon,
+  FileTextIcon,
+  Link1Icon,
+  LightningBoltIcon,
+} from '@radix-ui/react-icons';
 import { CustomLink } from '../../../shared/components/link';
 import { useStore } from '../../../state';
 import { passwordSelector } from '../../../state/password';
@@ -23,6 +29,11 @@ const links = [
     title: 'Connected Sites',
     icon: <Link1Icon className='size-5 text-muted-foreground' />,
     href: PopupPath.SETTINGS_CONNECTED_SITES,
+  },
+  {
+    title: 'Trading Mode',
+    icon: <LightningBoltIcon className='size-5 text-muted-foreground' />,
+    href: PopupPath.SETTINGS_TRADING_MODE,
   },
   {
     title: 'Advanced',
