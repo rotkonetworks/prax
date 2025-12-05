@@ -18,8 +18,8 @@ export interface TradingModeSettings {
 export interface TradingModeSlice {
   settings: TradingModeSettings;
   setAutoSign: (enabled: boolean) => void;
-  addAllowedOrigin: (origin: string) => void;
-  removeAllowedOrigin: (origin: string) => void;
+  addAllowedOrigin: (origin: string) => Promise<void>;
+  removeAllowedOrigin: (origin: string) => Promise<void>;
   setSessionDuration: (minutes: number) => void;
   setMaxValuePerSwap: (value: string) => void;
   /** Start a new trading session (sets expiresAt based on sessionDurationMinutes) */
@@ -57,21 +57,25 @@ export const createTradingModeSlice =
         });
       },
 
-      addAllowedOrigin: (origin: string) => {
+      addAllowedOrigin: async (origin: string) => {
         set(state => {
           if (!state.tradingMode.settings.allowedOrigins.includes(origin)) {
             state.tradingMode.settings.allowedOrigins.push(origin);
           }
         });
+        // Auto-save after state update
+        await local.set('tradingMode', get().tradingMode.settings);
       },
 
-      removeAllowedOrigin: (origin: string) => {
+      removeAllowedOrigin: async (origin: string) => {
         set(state => {
           const idx = state.tradingMode.settings.allowedOrigins.indexOf(origin);
           if (idx >= 0) {
             state.tradingMode.settings.allowedOrigins.splice(idx, 1);
           }
         });
+        // Auto-save after state update
+        await local.set('tradingMode', get().tradingMode.settings);
       },
 
       setSessionDuration: (minutes: number) => {
