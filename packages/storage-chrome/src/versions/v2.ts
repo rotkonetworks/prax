@@ -23,6 +23,23 @@ type LOCAL = {
 
   // optional values
   backupReminderSeen?: boolean;
+  /**
+   * Trading mode settings for CEX-like UX.
+   * When enabled, allows faster trading with reduced confirmations.
+   * Security: Only swaps are auto-signed, with origin whitelist and time limits.
+   */
+  tradingMode?: {
+    /** Enable auto-sign for swap transactions */
+    autoSign: boolean;
+    /** Origins allowed to auto-sign (REQUIRED - empty means disabled) */
+    allowedOrigins: string[];
+    /** Session duration in minutes (default 30) */
+    sessionDurationMinutes: number;
+    /** When the current session expires (ms since epoch, 0 = not active) */
+    expiresAt: number;
+    /** Max value per swap in base staking units (0 = unlimited) */
+    maxValuePerSwap: string;
+  };
   /** integer */
   compactFrontierBlockHeight?: number;
   /** url string */

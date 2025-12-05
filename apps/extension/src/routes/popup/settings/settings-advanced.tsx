@@ -1,4 +1,4 @@
-import { BarChartIcon, CameraIcon, HomeIcon, Share1Icon, TrashIcon } from '@radix-ui/react-icons';
+import { BarChartIcon, CameraIcon, HomeIcon, RocketIcon, Share1Icon, TrashIcon } from '@radix-ui/react-icons';
 import { CustomLink } from '../../../shared/components/link';
 import { usePopupNav } from '../../../utils/navigate';
 import { PopupPath } from '../paths';
@@ -6,6 +6,11 @@ import { DashboardGradientIcon } from '../../../icons/dashboard-gradient';
 import { SettingsScreen } from './settings-screen';
 
 const links = [
+  {
+    title: 'Trading Mode',
+    icon: <RocketIcon className='size-5 text-muted-foreground' />,
+    href: PopupPath.SETTINGS_TRADING_MODE,
+  },
   {
     title: 'Network Provider',
     icon: <Share1Icon className='size-5 text-muted-foreground' />,
