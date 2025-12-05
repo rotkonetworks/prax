@@ -176,7 +176,7 @@ export const SettingsTradingMode = () => {
                     >
                       <span className='text-sm truncate'>{origin}</span>
                       <button
-                        onClick={() => removeAllowedOrigin(origin)}
+                        onClick={() => void removeAllowedOrigin(origin)}
                         className='text-muted-foreground hover:text-destructive'
                       >
                         <Cross1Icon className='size-3' />
@@ -194,7 +194,7 @@ export const SettingsTradingMode = () => {
                         .map(site => (
                           <button
                             key={site.origin}
-                            onClick={() => addAllowedOrigin(site.origin)}
+                            onClick={() => void addAllowedOrigin(site.origin)}
                             className='rounded bg-secondary px-2 py-1 text-xs hover:bg-secondary/80'
                           >
                             + {new URL(site.origin).hostname}
