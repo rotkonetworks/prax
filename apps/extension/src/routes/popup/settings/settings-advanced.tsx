@@ -1,9 +1,12 @@
-import { BarChartIcon, CameraIcon, HomeIcon, RocketIcon, Share1Icon, TrashIcon } from '@radix-ui/react-icons';
+import { BarChartIcon, CameraIcon, HomeIcon, LockClosedIcon, RocketIcon, Share1Icon, TrashIcon } from '@radix-ui/react-icons';
 import { CustomLink } from '../../../shared/components/link';
 import { usePopupNav } from '../../../utils/navigate';
 import { PopupPath } from '../paths';
 import { DashboardGradientIcon } from '../../../icons/dashboard-gradient';
 import { SettingsScreen } from './settings-screen';
+import { Switch } from '@repo/ui/components/ui/switch';
+import { useState, useEffect } from 'react';
+import { localExtStorage } from '@repo/storage-chrome/local';
 
 const links = [
   {
@@ -38,6 +41,41 @@ const links = [
   },
 ];
 
+const SecuritySection = () => {
+  const [requireLogin, setRequireLogin] = useState(true);
+
+  useEffect(() => {
+    void localExtStorage.get('requireLoginForViewingKey').then(value => {
+      setRequireLogin(value ?? true);
+    });
+  }, []);
+
+  const handleToggle = (checked: boolean) => {
+    setRequireLogin(checked);
+    void localExtStorage.set('requireLoginForViewingKey', checked);
+  };
+
+  return (
+    <div className='mt-4 pt-4 border-t border-border'>
+      <div className='flex items-center gap-2 mb-3'>
+        <LockClosedIcon className='size-4 text-muted-foreground' />
+        <span className='text-sm font-medium'>Security</span>
+      </div>
+      <div className='flex items-center justify-between'>
+        <div className='flex flex-col gap-1'>
+          <span className='text-sm'>Require login for viewing</span>
+          <span className='text-xs text-muted-foreground'>
+            {requireLogin
+              ? 'DApps cannot read balances while locked'
+              : 'DApps can read balances without login'}
+          </span>
+        </div>
+        <Switch checked={requireLogin} onCheckedChange={handleToggle} />
+      </div>
+    </div>
+  );
+};
+
 const BuildInfoSection = () => (
   <div className='mt-auto pt-6 border-t border-border'>
     <div className='text-xs text-muted-foreground space-y-1'>
@@ -65,6 +103,7 @@ export const SettingsAdvanced = () => {
           <CustomLink key={i.href} title={i.title} icon={i.icon} onClick={() => navigate(i.href)} />
         ))}
       </div>
+      <SecuritySection />
       <BuildInfoSection />
     </SettingsScreen>
   );

@@ -4,10 +4,17 @@ import { localExtStorage } from '@repo/storage-chrome/local';
 import { sessionExtStorage } from '@repo/storage-chrome/session';
 
 export const getWalletId = async () => {
-  // Security: Require login before exposing wallet ID
-  const loggedIn = await sessionExtStorage.get('passwordKey');
-  if (!loggedIn) {
-    throw new ConnectError('Wallet is locked. Please unlock to access wallet.', Code.Unauthenticated);
+  // Check if login is required for wallet access (default: true for security)
+  const requireLogin = (await localExtStorage.get('requireLoginForViewingKey')) ?? true;
+
+  if (requireLogin) {
+    const loggedIn = await sessionExtStorage.get('passwordKey');
+    if (!loggedIn) {
+      throw new ConnectError(
+        'Wallet is locked. Please unlock to access wallet.',
+        Code.Unauthenticated,
+      );
+    }
   }
 
   const wallet0 = (await localExtStorage.get('wallets'))[0];
