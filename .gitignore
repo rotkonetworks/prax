@@ -70,3 +70,8 @@ scripts/private
 
 # nix
 /result
+
+# Build artifacts
+apps/extension/*.zip
+apps/extension/build-manifest-*.json
+apps/extension/checksums-*.sha256
