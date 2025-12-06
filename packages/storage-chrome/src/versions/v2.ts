@@ -56,4 +56,10 @@ type LOCAL = {
   walletCreationBlockHeight?: number;
   /** boolean */
   airgapSignerCameraEnabled?: boolean;
+  /**
+   * Security: Require login before exposing viewing key to dApps.
+   * When true (default), dApps cannot read balances/transactions while locked.
+   * When false, viewing key is accessible without login (convenience mode).
+   */
+  requireLoginForViewingKey?: boolean;
 };
