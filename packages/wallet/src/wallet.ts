@@ -73,13 +73,13 @@ export class Wallet<T extends CustodyTypeName = CustodyTypeName> {
         switch (this.custodyType) {
           case 'encryptedSeedPhrase': {
             // unsealed is the seed phrase string
-            const spendKey = generateSpendKey(unsealed);
-            return Promise.resolve(authorizePlan(spendKey, plan));
+            const spendKey = await generateSpendKey(unsealed);
+            return authorizePlan(spendKey, plan);
           }
           case 'encryptedSpendKey': {
             // unsealed is the spend key string
             const spendKey = SpendKey.fromJsonString(unsealed);
-            return Promise.resolve(authorizePlan(spendKey, plan));
+            return authorizePlan(spendKey, plan);
           }
           case 'airgapSigner': {
             // Airgap signer: sign via QR code with air-gapped device
